@@ -16,40 +16,43 @@ import useThemeStore from '@/store/useThemeStore';
 
 library.add(fas, far);
 
-const router = createBrowserRouter([
-  {
-    path: '/home',
-    element: (
-      <ProtectedRoutes>
-        <Home />
-      </ProtectedRoutes>
-    ),
-  },
-  {
-    path: '/book/:bookId',
-    element: (
-      <ProtectedRoutes>
-        <BookDetail />
-      </ProtectedRoutes>
-    ),
-  },
-  {
-    path: '/login',
-    element: <Login />,
-  },
-  {
-    path: '/register',
-    element: <Register />,
-  },
-  {
-    path: '/404',
-    element: <ErrorNotFound />,
-  },
-  {
-    path: '/',
-    element: <Root />,
-  },
-]);
+const router = createBrowserRouter(
+  [
+    {
+      path: '/home',
+      element: (
+        <ProtectedRoutes>
+          <Home />
+        </ProtectedRoutes>
+      ),
+    },
+    {
+      path: '/book/:bookId',
+      element: (
+        <ProtectedRoutes>
+          <BookDetail />
+        </ProtectedRoutes>
+      ),
+    },
+    {
+      path: '/login',
+      element: <Login />,
+    },
+    {
+      path: '/register',
+      element: <Register />,
+    },
+    {
+      path: '/404',
+      element: <ErrorNotFound />,
+    },
+    {
+      path: '/',
+      element: <Root />,
+    },
+  ],
+  {basename: '/library-app-react'}
+);
 
 const App: React.FC = () => {
   const {theme} = useThemeStore();
