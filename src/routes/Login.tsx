@@ -9,7 +9,8 @@ import AuthLogo from '@/components/AuthLogo';
 import AuthSectionLeft from '@/components/AuthSectionLeft';
 import ButtonThemeToggler from '@/components/ButtonThemeToggler';
 import LoadingButtonPlaceholder from '@/components/LoadingButtonPlaceholder';
-import useLoginStore from '@/store/useLoginStore';
+import {useAppDispatch} from '@/store';
+import {doLogin} from '@/store/reducers/auth';
 
 type LoginInputs = {
   email: string;
@@ -18,7 +19,7 @@ type LoginInputs = {
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const {doLogin} = useLoginStore();
+  const dispatch = useAppDispatch();
   const [showPassword, setShowPassword] = React.useState(false);
   const {
     register,
@@ -35,7 +36,7 @@ const Login: React.FC = () => {
     await new Promise<void>(resolve => {
       setTimeout(async () => resolve(), 2000);
     });
-    doLogin();
+    dispatch(doLogin());
     navigate('/home');
     toast.success('Login success', {
       position: 'top-right',

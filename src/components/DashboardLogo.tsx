@@ -2,14 +2,15 @@ import React from 'react';
 
 import imgBookshelf from '@/assets/bookshelf.png';
 import imgBookshelfDark from '@/assets/bookshelf-dark.png';
-import useThemeStore from '@/store/useThemeStore';
+import {useAppSelector} from '@/store';
+import {isDarkSelector} from '@/store/reducers/theme';
 
 const DashboardLogo = () => {
-  const {isDark} = useThemeStore();
+  const isDark = useAppSelector(isDarkSelector);
 
   return (
     <img
-      src={isDark() ? imgBookshelfDark : imgBookshelf}
+      src={isDark ? imgBookshelfDark : imgBookshelf}
       alt="Bookshelf icon"
       className="w-8 lg:w-12"
     />

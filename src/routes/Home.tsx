@@ -1,4 +1,5 @@
 import React from 'react';
+import {Helmet} from 'react-helmet';
 import {useNavigate} from 'react-router-dom';
 
 import HomeBookList from '@/components/HomeBookList';
@@ -20,6 +21,9 @@ const Home = () => {
 
   return (
     <>
+      <Helmet>
+        <title>Library Home</title>
+      </Helmet>
       <div className="flex min-h-screen justify-end dark:bg-dark-surface">
         <HomeSideNav
           overlay={showSideNavOverlay}

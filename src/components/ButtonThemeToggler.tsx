@@ -1,12 +1,14 @@
 import React from 'react';
 
-import useThemeStore from '@/store/useThemeStore';
+import {useAppDispatch, useAppSelector} from '@/store';
+import {toggleTheme} from '@/store/reducers/theme';
 
 const ButtonThemeToggler: React.FC = () => {
-  const {toggleTheme, theme} = useThemeStore();
+  const theme = useAppSelector(state => state.theme.theme);
+  const dispatch = useAppDispatch();
 
   const onToggle = React.useCallback(() => {
-    toggleTheme();
+    dispatch(toggleTheme());
   }, []);
 
   return (

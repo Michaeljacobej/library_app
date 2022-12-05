@@ -3,7 +3,8 @@ import React from 'react';
 import ReactModal from 'react-modal';
 
 import LoadingButtonPlaceholder from '@/components/LoadingButtonPlaceholder';
-import useBookStore from '@/store/useBookStore';
+import {useAppDispatch} from '@/store';
+import {removeBook} from '@/store/reducers/book';
 
 interface Props {
   isVisible: boolean;
@@ -20,14 +21,14 @@ const ModalConfirmDelete: React.FC<Props> = ({
   onAfterDelete,
   onClose,
 }) => {
-  const {removeBook} = useBookStore();
+  const dispatch = useAppDispatch();
   const [loading, setLoading] = React.useState(false);
 
   const onDelete = React.useCallback(() => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      removeBook(bookId);
+      dispatch(removeBook(bookId));
       onClose();
       onAfterDelete();
     }, 2000);

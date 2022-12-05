@@ -1,16 +1,16 @@
 import React from 'react';
 import {Navigate} from 'react-router-dom';
 
-import useLoginStore from '@/store/useLoginStore';
+import {useAppSelector} from '@/store';
 
 interface Props {
   children: JSX.Element;
 }
 
 const ProtectedRoutes: React.FC<Props> = ({children}) => {
-  const isLoggedIn = useLoginStore(state => state.loggedIn);
+  const isAuth = useAppSelector(state => state.auth.isAuth);
 
-  if (!isLoggedIn) {
+  if (!isAuth) {
     return <Navigate to="/login" replace />;
   }
   return children;

@@ -2,7 +2,8 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import React from 'react';
 
 import imgProfile from '@/assets/profile.png';
-import useLoginStore from '@/store/useLoginStore';
+import {useAppDispatch} from '@/store';
+import {doLogout} from '@/store/reducers/auth';
 
 interface Props {
   overlay: boolean;
@@ -11,7 +12,11 @@ interface Props {
 }
 
 const HomeSideNav: React.FC<Props> = ({overlay, onCloseOverlay, onAddBook}) => {
-  const {doLogout} = useLoginStore();
+  const dispatch = useAppDispatch();
+
+  const onLogout = React.useCallback(() => {
+    dispatch(doLogout());
+  }, []);
 
   return (
     <div
@@ -46,7 +51,7 @@ const HomeSideNav: React.FC<Props> = ({overlay, onCloseOverlay, onAddBook}) => {
         className={`my-2 flex items-center rounded-lg border border-lighter-gray px-4 py-1 dark:text-white ${
           overlay ? '' : 'md:hidden lg:flex'
         }`}
-        onClick={doLogout}>
+        onClick={onLogout}>
         <FontAwesomeIcon icon="sign-out" className="mr-2" />
         <span className="ml-2 font-bold">Logout</span>
       </button>
