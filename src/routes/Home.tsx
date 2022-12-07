@@ -37,12 +37,7 @@ const Home = () => {
           <NavHeader onBurgerClick={() => setShowSideNavOverlay(true)} />
           <div className="flex flex-col">
             <HomeCarousel onBookClick={onBookClick} />
-            <section className="w-full flex-grow px-4 py-4 transition-all">
-              <h3 className="pb-4 text-2xl font-bold dark:text-lighter-gray">
-                List Book
-              </h3>
-              <HomeBookList onBookClick={onBookClick} />
-            </section>
+            <HomeBookList onBookClick={onBookClick} />
           </div>
         </main>
       </div>

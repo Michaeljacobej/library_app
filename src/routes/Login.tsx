@@ -9,6 +9,7 @@ import AuthLogo from '@/components/AuthLogo';
 import AuthSectionLeft from '@/components/AuthSectionLeft';
 import ButtonThemeToggler from '@/components/ButtonThemeToggler';
 import LoadingButtonPlaceholder from '@/components/LoadingButtonPlaceholder';
+import useAuthCheck from '@/hooks/useAuthCheck';
 import {useAppDispatch} from '@/store';
 import {doLogin} from '@/store/reducers/auth';
 
@@ -20,11 +21,14 @@ type LoginInputs = {
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const {checkUser} = useAuthCheck();
   const [showPassword, setShowPassword] = React.useState(false);
+  const [loginError, setLoginError] = React.useState(false);
   const {
     register,
     handleSubmit,
     watch,
+    setError,
     formState: {errors, isSubmitting},
   } = useForm<LoginInputs>();
 
@@ -32,16 +36,23 @@ const Login: React.FC = () => {
     setShowPassword(state => !state);
   }, []);
 
-  const onSubmit: SubmitHandler<LoginInputs> = React.useCallback(async () => {
+  const onSubmit: SubmitHandler<LoginInputs> = React.useCallback(async data => {
     await new Promise<void>(resolve => {
       setTimeout(async () => resolve(), 2000);
     });
-    dispatch(doLogin());
-    navigate('/home');
-    toast.success('Login success', {
-      position: 'top-right',
-      className: 'bg-green-200 dark:bg-green-700 text-black dark:text-white',
-    });
+    const foundUser = checkUser(data.email, data.password);
+    if (foundUser.success && foundUser.data) {
+      dispatch(doLogin(foundUser.data));
+      navigate('/home');
+      toast.success('Login success', {
+        position: 'top-right',
+        className: 'bg-green-200 dark:bg-green-700 text-black dark:text-white',
+      });
+      return;
+    }
+    setLoginError(true);
+    setError('email', {});
+    setError('password', {});
   }, []);
 
   return (
@@ -74,7 +85,7 @@ const Login: React.FC = () => {
                 <input
                   type="email"
                   aria-invalid={errors.email && 'true'}
-                  className={`peer w-full rounded-md border border-lighter-gray bg-white px-3 py-2 text-black drop-shadow-xl transition-all focus:pt-7 focus:outline-2 focus:outline-black disabled:bg-gray-100 aria-[invalid]:border-red-500 dark:bg-dark-surface dark:text-white dark:focus:outline-white dark:disabled:bg-white/10 ${
+                  className={`peer w-full rounded-md border border-lighter-gray bg-white px-3 py-2 text-black drop-shadow-xl transition-all focus:pt-7 focus:outline-2 focus:outline-black disabled:bg-gray-100 aria-[invalid]:border-red-500 aria-[invalid]:text-red-500 dark:bg-dark-surface dark:text-white dark:focus:outline-white dark:disabled:bg-white/10 dark:aria-[invalid]:text-red-500 ${
                     watch('email') ? 'pt-7' : ''
                   }`}
                   {...register('email', {
@@ -102,7 +113,7 @@ const Login: React.FC = () => {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   aria-invalid={errors.password && 'true'}
-                  className={`peer w-full rounded-md border border-lighter-gray bg-white px-3 py-2 text-black drop-shadow-xl transition-all focus:pt-7 focus:outline-2 focus:outline-black disabled:bg-gray-100 aria-[invalid]:border-red-500 dark:bg-dark-surface dark:text-white dark:focus:outline-white dark:disabled:bg-white/10 ${
+                  className={`peer w-full rounded-md border border-lighter-gray bg-white px-3 py-2 text-black drop-shadow-xl transition-all focus:pt-7 focus:outline-2 focus:outline-black disabled:bg-gray-100 aria-[invalid]:border-red-500 aria-[invalid]:text-red-500 dark:bg-dark-surface dark:text-white dark:focus:outline-white dark:disabled:bg-white/10 dark:aria-[invalid]:text-red-500 ${
                     watch('password') ? 'pt-7' : ''
                   }`}
                   {...register('password', {
@@ -129,7 +140,7 @@ const Login: React.FC = () => {
                   {errors.password.message}
                 </span>
               )}
-              <div className="mx-2 mt-4 flex flex-row items-center justify-between">
+              <div className="mx-2 mt-4 mb-4 flex flex-row items-center justify-between">
                 <div className="group flex cursor-pointer items-center">
                   <input
                     type="checkbox"
@@ -149,7 +160,12 @@ const Login: React.FC = () => {
                   Forgot Password
                 </button>
               </div>
-              <div className="mt-5 flex w-full gap-3 lg:w-[70%]">
+              {loginError && (
+                <span className="text-xs text-red-500">
+                  Login Failed: Your email or password is incorrect
+                </span>
+              )}
+              <div className="flex w-full gap-3 lg:w-[70%]">
                 <button
                   type="submit"
                   className="relative flex-1 overflow-hidden rounded-md bg-black py-2 text-white transition-all hover:flex-[1.2] dark:bg-white dark:text-black">

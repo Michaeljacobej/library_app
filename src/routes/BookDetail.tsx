@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import {Navigate, useNavigate, useParams} from 'react-router-dom';
 
 import BookCategory from '@/components/BookCategory';
+import HTMLBreakText from '@/components/HTMLBreakText';
 import ModalAddEditBook from '@/components/ModalAddEditBook';
 import ModalConfirmDelete from '@/components/ModalConfirmDelete';
 import {useAppDispatch, useAppSelector} from '@/store';
@@ -113,13 +114,15 @@ const BookDetail = () => {
                 <h1 className="text-3xl font-bold">{bookDetail.title}</h1>
                 <h2 className="font-bold">
                   {moment(bookDetail.datePublished.date).format(
-                    getMomentFormatFromType(bookDetail.datePublished.type)
+                    getMomentFormatFromType(bookDetail.datePublished.type.code)
                   )}
                 </h2>
               </div>
               <h2 className="font-bold text-green-500">Available</h2>
             </div>
-            <p className="py-4 text-sm">{bookDetail.description}</p>
+            <p className="py-4 text-sm">
+              <HTMLBreakText>{bookDetail.description}</HTMLBreakText>
+            </p>
           </div>
           <div className="flex flex-col items-center justify-end px-2 py-3 md:flex-1 md:self-end md:px-14 md:py-12">
             <button

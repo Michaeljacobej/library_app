@@ -2,7 +2,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import React from 'react';
 
 import imgProfile from '@/assets/profile.png';
-import {useAppDispatch} from '@/store';
+import {useAppDispatch, useAppSelector} from '@/store';
 import {doLogout} from '@/store/reducers/auth';
 
 interface Props {
@@ -13,6 +13,7 @@ interface Props {
 
 const HomeSideNav: React.FC<Props> = ({overlay, onCloseOverlay, onAddBook}) => {
   const dispatch = useAppDispatch();
+  const user = useAppSelector(state => state.auth.user);
 
   const onLogout = React.useCallback(() => {
     dispatch(doLogout());
@@ -41,10 +42,10 @@ const HomeSideNav: React.FC<Props> = ({overlay, onCloseOverlay, onAddBook}) => {
         }`}
       />
       <h2
-        className={`inline text-2xl font-bold dark:text-white ${
+        className={`inline text-center text-2xl font-bold dark:text-white ${
           overlay ? '' : 'md:hidden lg:inline'
         }`}>
-        Niki Zefanya
+        {user?.fullname}
       </h2>
       <button
         type="button"
@@ -56,7 +57,7 @@ const HomeSideNav: React.FC<Props> = ({overlay, onCloseOverlay, onAddBook}) => {
         <span className="ml-2 font-bold">Logout</span>
       </button>
       <ul
-        className={`my-12 flex w-full flex-1 flex-col items-center gap-12 px-0 text-2xl font-bold dark:text-white ${
+        className={`my-12 flex w-full flex-1 flex-col items-center gap-12 px-0 text-xl font-bold dark:text-white ${
           overlay ? '' : 'lg:items-start lg:px-8'
         }`}>
         <li>

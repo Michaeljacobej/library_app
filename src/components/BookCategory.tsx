@@ -9,11 +9,11 @@ interface Props {
 
 const BookCategory: React.FC<Props> = ({categories}) => {
   return (
-    <div className="flex flex-wrap gap-2 pt-12 pb-4 md:pt-2 lg:pr-12">
+    <ul className="flex flex-wrap gap-2 pt-12 pb-4 md:pt-2 lg:pr-12">
       {categories.map(cat => (
         <Chip key={cat.id} value={cat.name} />
       ))}
-    </div>
+    </ul>
   );
 };
 

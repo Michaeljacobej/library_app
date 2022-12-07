@@ -11,12 +11,16 @@ export interface Category {
 
 export type DatePickerState = 'year' | 'month' | 'date';
 
+export interface DatePickerObjState {
+  code: DatePickerState;
+}
+
 export interface PublishedDate {
-  type: DatePickerState;
+  type: DatePickerObjState;
   date: Date;
 }
 
-interface Book {
+export interface Book {
   id: number;
   title: string;
   datePublished: PublishedDate;
@@ -37,23 +41,18 @@ export interface DatePickerOptions {
   label: string;
 }
 
-export const datePickerOptions: DatePickerOptions[] = [
-  {value: 'year', label: 'Tahun'},
-  {value: 'month', label: 'Bulan & Tahun'},
-  {value: 'date', label: 'Tanggal, Bulan & Tahun'},
+export const datePickerOptions: DatePickerObjState[] = [
+  {code: 'year'},
+  {code: 'month'},
+  {code: 'date'},
 ];
-
-export interface CategoryPickerOptions {
-  value: number;
-  label: string;
-}
 
 const initialState: BookState = {
   bookData: [
     {
       id: 1,
       title: 'Dilan 1990',
-      datePublished: {type: 'year', date: new Date('2014')},
+      datePublished: {type: {code: 'year'}, date: new Date('2014')},
       category: [11],
       author: 'Pidi Baiq',
       imgUrl:
@@ -64,7 +63,7 @@ const initialState: BookState = {
     {
       id: 2,
       title: 'Ubur-ubur Lembur',
-      datePublished: {type: 'date', date: new Date('2018/02/07')},
+      datePublished: {type: {code: 'date'}, date: new Date('2018/02/07')},
       category: [17],
       author: 'Raditya Dika',
       imgUrl: 'https://iili.io/HCkmurG.md.jpg',
@@ -74,7 +73,7 @@ const initialState: BookState = {
     {
       id: 3,
       title: 'Laskar Pelangi',
-      datePublished: {type: 'year', date: new Date('2005')},
+      datePublished: {type: {code: 'year'}, date: new Date('2005')},
       category: [14],
       author: 'Andrea Hirata',
       imgUrl: 'https://iili.io/HCkm8Eg.md.jpg',
@@ -84,7 +83,7 @@ const initialState: BookState = {
     {
       id: 4,
       title: 'Sebuah Seni Untuk Bersikap Bodo Amat',
-      datePublished: {type: 'date', date: new Date('2016/09/13')},
+      datePublished: {type: {code: 'date'}, date: new Date('2016/09/13')},
       category: [8],
       author: 'Mark Manson',
       imgUrl:
@@ -95,12 +94,41 @@ const initialState: BookState = {
     {
       id: 5,
       title: 'React Native Cookbook',
-      datePublished: {type: 'date', date: new Date('2016/12/22')},
+      datePublished: {type: {code: 'date'}, date: new Date('2016/12/22')},
       category: [3],
       author: 'Dan Ward',
       imgUrl: 'https://miro.medium.com/max/766/1*5WF74Gp_XP3I3mmbG3RAzQ.png',
       description:
         "If you are a developer looking to create mobile applications with maximized code reusability and minimized cost, React Native is what you need. With this practical guide, you'll be able to build attractive UIs, tackle common problems in mobile development, and achieve improved performance in mobile environments.",
+    },
+    {
+      id: 6,
+      title: 'Matahari',
+      datePublished: {type: {code: 'date'}, date: new Date('2022/09/05')},
+      category: [10],
+      author: 'Tere Liye',
+      imgUrl: 'https://cdn.gramedia.com/uploads/items/img20220905_11433462.jpg',
+      description: `Kini anak istimewa itu bernama Ali. Sama dengan Seli dan Raib, ia juga berusia 15 tahun, masih kelas X. Jika orangtuanya mengizinkan, bahkan seharusnya ia sudah duduk di tingkat akhir ilmu fisika program doktor. Bagi Ali, guru dan teman-teman sekelasnya sangat membosankan. Namun hal itu tidak berlangsung lama setelah pada akhirnya teman sekelasnya mengetahui ada hal aneh pada dirinya dan Seli.
+
+        Kalau Seli bisa mengeluarkan petir, lain halnya dengan Ali, ia bisa berubah menjadi beruang raksasa. Mengetahui bahwa mereka istimewa, mereka kemudian berpetualang ke tempat-tempat yang menakjubkan.
+        
+        Ali, sangatlah paham paham bahwa dunia tidaklah sesederhana yang dilihat oleh orang-orang, dan lebih daripada itu, Ali akhirnya mengerti, bahwa persahabatan merupakan hal yang indah yang paling utama. Apa yang sebenarnya terjadi pada Ali?`,
+    },
+    {
+      id: 7,
+      title: 'Atomic Habits: Perubahan Kecil yang Memberikan Hasil Luar Biasa',
+      datePublished: {type: {code: 'date'}, date: new Date('2019/09/15')},
+      category: [8],
+      author: 'James Clear',
+      imgUrl:
+        'https://cdn.gramedia.com/uploads/items/9786020633176_.Atomic_Habit.jpg',
+      description: `Orang mengira ketika Anda ingin mengubah hidup, Anda perlu memikirkan hal-hal besar. Namun pakar kebiasaan terkenal kelas dunia James Clear telah menemukan sebuah cara lain. Ia tahu bahwa perubahan nyata berasal dari efek gabungan ratusan keputusan kecil—dari mengerjakan dua push-up sehari, bangun lima menit lebih awal, sampai menahan sebentar hasrat untuk menelepon.
+
+        Ia menyebutnya atomic habits.
+        
+        Ia menyingkap beberapa trik sederhana dalam hidup kita (seni Menumpuk Kebiasaan yang terlupakan, kekuatan tak terduga Aturan Dua Menit, atau trik untuk masuk ke dalam Zona Goldilocks), dan menggali ke dalam teori psikologi dan neurosains paling baru untuk menerangkan mengapa semua itu penting. Dalam rangka itu, ia menceritakan kisah-kisah inspiratif para peraih medali emas Olimpiade, para CEO terkemuka, dan ilmuwan-ilmuwan istimewa yang telah menggunakan sains tentang kebiasaan-kebiasaan kecil untuk tetap produktif, tetap termotivasi, dan bahagia.
+        
+        Perubahan-perubahan kecil ini akan mendatangkan pengaruh revolusioner pada karier Anda, hubungan pribadi Anda, dan hidup Anda.`,
     },
   ],
   carouselData: [1, 2, 3],
@@ -173,7 +201,7 @@ export const booksSelector = createSelector(
       ...val,
       category: val.category
         .map(cat => category.find(catVal => catVal.id === cat))
-        .filter(cat => cat !== undefined),
+        .filter((cat): cat is Category => cat !== undefined),
     }))
 );
 
@@ -208,11 +236,6 @@ export const isInCarouselSelector = createSelector(
   (state: RootState, bookId: number) => bookId,
   (carousels, bookId) =>
     carousels.find(carouselId => carouselId === bookId) !== undefined
-);
-
-export const categoriesPickerSelector = createSelector(
-  (state: RootState) => state.book.categories,
-  categories => categories.map(cat => ({value: cat.id, label: cat.name}))
 );
 
 export const {

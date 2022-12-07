@@ -12,7 +12,7 @@ const DashboardLogo = () => {
     <img
       src={isDark ? imgBookshelfDark : imgBookshelf}
       alt="Bookshelf icon"
-      className="w-8 lg:w-12"
+      className="w-8 lg:w-10"
     />
   );
 };

@@ -10,11 +10,11 @@ const Chip: React.FC<Props> = ({value}) => {
   const randColor = React.useMemo(() => getRandomSeededColor(value), []);
 
   return (
-    <div
-      className="rounded-full px-3 py-1 text-white"
+    <li
+      className="rounded-full px-3 py-1 text-sm text-white"
       style={{backgroundColor: randColor}}>
       {value}
-    </div>
+    </li>
   );
 };
 

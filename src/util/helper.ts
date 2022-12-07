@@ -38,4 +38,14 @@ export const getRandomSeededColor = (seed: string | undefined) => {
   return colors[index];
 };
 
+export const getLabelFromType = (type: DatePickerState) => {
+  if (type === 'year') {
+    return 'Tahun';
+  }
+  if (type === 'month') {
+    return 'Bulan & Tahun';
+  }
+  return 'Tanggal, Bulan & Tahun';
+};
+
 export default {getImageFromURL, getDatePropsFromType};
