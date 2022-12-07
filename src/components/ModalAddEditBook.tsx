@@ -1,12 +1,26 @@
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import React from 'react';
-import {SubmitHandler, useForm} from 'react-hook-form';
+import DatePicker from 'react-datepicker';
+import {Controller, SubmitHandler, useForm, useWatch} from 'react-hook-form';
 import toast from 'react-hot-toast';
 import ReactModal from 'react-modal';
+import Select from 'react-select';
 import TextareaAutosize from 'react-textarea-autosize';
 
 import LoadingButtonPlaceholder from '@/components/LoadingButtonPlaceholder';
-import useBookStore from '@/store/useBookStore';
+import {useAppDispatch, useAppSelector} from '@/store';
+import {
+  addBook,
+  Category,
+  datePickerOptions,
+  editBook,
+  PublishedDate,
+} from '@/store/reducers/book';
+import {
+  getDatePropsFromType,
+  getLabelFromType,
+  getRandomSeededColor,
+} from '@/util/helper';
 
 interface Props {
   mode: 'add' | 'edit';
@@ -19,6 +33,8 @@ interface BookInputs {
   id?: number;
   imgUrl: string;
   title: string;
+  datePublished: PublishedDate;
+  category: Category[];
   author: string;
   description: string;
 }
@@ -29,9 +45,12 @@ const ModalAddEditBook: React.FC<Props> = ({
   isVisible,
   onClose,
 }) => {
+  const categories = useAppSelector(state => state.book.categories);
+  const dispatch = useAppDispatch();
+
   const isEdit = React.useMemo(() => mode === 'edit', [mode]);
-  const {addBook, editBook} = useBookStore();
   const {
+    control,
     register,
     handleSubmit,
     watch,
@@ -39,7 +58,17 @@ const ModalAddEditBook: React.FC<Props> = ({
     formState: {errors, isSubmitting},
   } = useForm<BookInputs>({
     defaultValues: React.useMemo(
-      () => (isEdit ? {id: 0, ...bookDetail} : undefined),
+      () =>
+        isEdit && bookDetail
+          ? {
+              id: 0,
+              ...bookDetail,
+              datePublished: {
+                type: bookDetail.datePublished.type,
+                date: new Date(bookDetail.datePublished.date),
+              },
+            }
+          : undefined,
       [bookDetail]
     ),
   });
@@ -49,20 +78,44 @@ const ModalAddEditBook: React.FC<Props> = ({
       setTimeout(async () => resolve(), 2000);
     });
     onClose();
+    const category = data.category.map(cat => cat.id);
+    const newDate = new Date(data.datePublished.date);
+    if (data.datePublished.type.code === 'month') {
+      newDate.setDate(1);
+    }
+    if (data.datePublished.type.code === 'year') {
+      newDate.setDate(1);
+      newDate.setMonth(0);
+    }
     if (mode === 'add') {
-      addBook({id: 0, ...data});
+      dispatch(
+        addBook({
+          id: 0,
+          ...data,
+          category,
+        })
+      );
       toast.success('Book added successfully', {
         position: 'top-right',
         className: 'bg-green-200 dark:bg-green-700 text-black dark:text-white',
       });
       return;
     }
-    editBook({id: 0, ...bookDetail, ...data});
+    dispatch(
+      editBook({
+        id: 0,
+        ...bookDetail,
+        ...data,
+        category,
+      })
+    );
     toast.success('Book edited successfully', {
       position: 'top-right',
       className: 'bg-green-200 dark:bg-green-700 text-black dark:text-white',
     });
   }, []);
+
+  const dateType = useWatch({control, name: 'datePublished.type.code'});
 
   const onAfterClose = React.useCallback(() => {
     reset();
@@ -74,7 +127,7 @@ const ModalAddEditBook: React.FC<Props> = ({
       onAfterClose={onAfterClose}
       onRequestClose={onClose}
       closeTimeoutMS={400}
-      className="mx-4 flex min-w-full flex-col rounded-xl bg-white p-6 transition-all duration-300 dark:bg-dark-surface md:min-w-[40em] lg:min-w-[50em]"
+      className="mx-4 flex max-h-[95vh] min-w-full flex-col overflow-y-auto rounded-xl bg-white p-6 transition-all duration-300 dark:bg-dark-surface md:min-w-[40em] lg:min-w-[50em]"
       overlayClassName="fixed inset-0 z-[1000] items-center justify-center bg-black/30 px-4 opacity-0 transition-all duration-700 dark:bg-white/10">
       <div className="flex justify-between">
         <h1 className="text-2xl font-bold dark:text-white">
@@ -182,10 +235,94 @@ const ModalAddEditBook: React.FC<Props> = ({
             )}
           </div>
         </div>
-        <div className="flex w-full items-center">
-          <h2 className="hidden w-1/4 dark:text-white sm:inline">
-            Description
-          </h2>
+        <div className="flex w-full flex-col sm:flex-row sm:items-center">
+          <h2 className="dark:text-white sm:w-1/4">Date Type</h2>
+          <div className="w-full sm:w-3/4">
+            <Controller
+              control={control}
+              defaultValue={
+                datePickerOptions.find(
+                  val => val.code === bookDetail?.datePublished.type.code
+                ) ?? datePickerOptions[2]
+              }
+              name="datePublished.type"
+              render={({field}) => (
+                <Select
+                  {...field}
+                  options={datePickerOptions}
+                  getOptionValue={option => option.code}
+                  getOptionLabel={option => getLabelFromType(option.code)}
+                  classNames={{
+                    input: () => '!text-black dark:!text-white',
+                    singleValue: () => '!text-black dark:!text-white',
+                    menu: () => 'dark:!bg-dark-surface',
+                    menuList: () => 'dark:text-white',
+                    option: data => (data.isFocused ? '!bg-white/10' : ''),
+                    control: () =>
+                      'rounded-md border !shadow-none !border-lighter-gray bg-white text-black drop-shadow-xl disabled:bg-gray-100 aria-[invalid]:border-red-500 dark:bg-dark-surface dark:text-white dark:focus:!border-white dark:disabled:bg-white/10',
+                  }}
+                />
+              )}
+            />
+          </div>
+        </div>
+        <div className="flex w-full flex-col sm:flex-row sm:items-center">
+          <h2 className="dark:text-white sm:w-1/4">Publish Date</h2>
+          <div className="w-full sm:w-3/4">
+            <Controller
+              control={control}
+              defaultValue={new Date()}
+              name="datePublished.date"
+              render={({field}) => (
+                <DatePicker
+                  placeholderText="Select date"
+                  onChange={date => field.onChange(date)}
+                  selected={field.value}
+                  className="w-full rounded-md border border-lighter-gray bg-white px-3 py-2 text-black drop-shadow-xl transition-all focus:outline-2 focus:outline-black disabled:bg-gray-100 aria-[invalid]:border-red-500 dark:bg-dark-surface dark:text-white dark:focus:outline-white dark:disabled:bg-white/10"
+                  {...getDatePropsFromType(dateType)}
+                />
+              )}
+            />
+          </div>
+        </div>
+        <div className="flex w-full flex-col sm:flex-row sm:items-center">
+          <h2 className="dark:text-white sm:w-1/4">Category</h2>
+          <div className="w-full sm:w-3/4">
+            <Controller
+              control={control}
+              defaultValue={bookDetail?.category ?? []}
+              name="category"
+              render={({field}) => (
+                <Select
+                  {...field}
+                  options={categories}
+                  isMulti
+                  getOptionValue={option => `${option.id}`}
+                  getOptionLabel={option => option.name}
+                  classNames={{
+                    input: () => '!text-black dark:!text-white',
+                    multiValueLabel: () => '!text-white',
+                    multiValueRemove: () => '!text-black hover:!text-red-600',
+                    menu: () => 'dark:!bg-dark-surface',
+                    menuList: () => 'dark:text-white',
+                    option: data => (data.isFocused ? '!bg-white/10' : ''),
+                    control: () =>
+                      'rounded-md border !shadow-none !border-lighter-gray bg-white text-black drop-shadow-xl disabled:bg-gray-100 aria-[invalid]:border-red-500 dark:bg-dark-surface dark:text-white dark:focus:!border-white dark:disabled:bg-white/10',
+                  }}
+                  styles={{
+                    multiValue: (base, state) => ({
+                      ...base,
+                      backgroundColor: getRandomSeededColor(state.data.name),
+                    }),
+                    menu: base => ({...base, position: 'relative'}),
+                  }}
+                />
+              )}
+            />
+          </div>
+        </div>
+        <div className="flex w-full flex-col sm:flex-row sm:items-center">
+          <h2 className="dark:text-white sm:w-1/4">Description</h2>
           <div className="w-full sm:w-3/4">
             <div className="relative">
               <TextareaAutosize

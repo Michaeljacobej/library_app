@@ -31,8 +31,8 @@ const CardCarousel: React.FC<Props> = ({title, author, imgUrl, onClick}) => {
       }}
       onClick={swiperSlide.isActive ? onClick : slideTo}>
       <div className="w-full bg-black/30 px-6 py-4 text-start text-white">
-        <h2 className="text-2xl font-semibold">{title}</h2>
-        <p>{author}</p>
+        <h2 className="font-semibold">{title}</h2>
+        <p className="text-sm">{author}</p>
       </div>
     </button>
   );

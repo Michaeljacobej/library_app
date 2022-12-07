@@ -1,14 +1,25 @@
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import React from 'react';
+import {useNavigate} from 'react-router-dom';
+import Select from 'react-select';
 
 import ButtonThemeToggler from '@/components/ButtonThemeToggler';
 import DashboardLogo from '@/components/DashboardLogo';
+import {useAppSelector} from '@/store';
+import {booksSelector} from '@/store/reducers/book';
 
 interface Props {
   onBurgerClick: () => void;
 }
 
 const NavHeader: React.FC<Props> = ({onBurgerClick}) => {
+  const navigate = useNavigate();
+  const books = useAppSelector(booksSelector);
+
+  const onClickSearch = React.useCallback((id: number) => {
+    navigate(`/book/${id}`);
+  }, []);
+
   return (
     <header className="sticky top-0 z-10 w-full bg-white py-3 shadow-xl transition-all dark:bg-little-dark-surface">
       <nav className="flex flex-col px-5">
@@ -26,15 +37,31 @@ const NavHeader: React.FC<Props> = ({onBurgerClick}) => {
               <FontAwesomeIcon icon="caret-down" className="ml-2" />
             </button>
           </div>
-          <button
-            type="button"
-            className="hidden flex-1 items-center rounded-full border border-lighter-gray px-6 text-sm text-light-gray dark:text-white lg:flex">
+          <div className="hidden flex-1 items-center rounded-full border border-lighter-gray px-6 text-sm text-light-gray dark:text-white lg:flex">
             <FontAwesomeIcon icon="search" className="mr-2" />
-            <span className="pl-2">Search book</span>
-          </button>
+            <Select
+              placeholder="Cari nama / author buku"
+              options={books}
+              getOptionValue={option => `${option.id}`}
+              getOptionLabel={option => `${option.title} - ${option.author}`}
+              classNames={{
+                input: () => '!text-black dark:!text-white',
+                singleValue: () => '!text-black dark:!text-white',
+                container: () => 'w-full',
+                menu: () => '!bg-dark-surface',
+                menuList: () => 'dark:text-white',
+                indicatorSeparator: () => '!bg-transparent',
+                dropdownIndicator: () => '!text-transparent',
+                option: data => (data.isFocused ? '!bg-white/10' : ''),
+                control: () =>
+                  '!bg-transparent !border-transparent !shadow-none hover:!border-transparent w-full',
+              }}
+              onChange={data => (data ? onClickSearch(data.id) : null)}
+            />
+          </div>
           <div className="flex items-center">
             <DashboardLogo />
-            <h2 className="hidden pl-2 text-base font-bold dark:text-white lg:inline lg:text-2xl">
+            <h2 className="hidden pl-2 text-base font-bold dark:text-white lg:inline lg:text-xl">
               Library
             </h2>
             <ButtonThemeToggler />

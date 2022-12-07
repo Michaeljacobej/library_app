@@ -7,7 +7,7 @@ what i use :
 - React Modal
 - React Hook Form
 - React Hot Toast
-- Zustand
+- Redux
 - React Helmet
 - TailwindCSS
 - FontAwesome

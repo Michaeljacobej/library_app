@@ -1,51 +1,61 @@
 import {IconProp} from '@fortawesome/fontawesome-svg-core';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import moment from 'moment';
 import React from 'react';
 import {Helmet} from 'react-helmet';
 import toast from 'react-hot-toast';
-import {useNavigate, useParams} from 'react-router-dom';
+import {Navigate, useNavigate, useParams} from 'react-router-dom';
 
+import BookCategory from '@/components/BookCategory';
+import HTMLBreakText from '@/components/HTMLBreakText';
 import ModalAddEditBook from '@/components/ModalAddEditBook';
 import ModalConfirmDelete from '@/components/ModalConfirmDelete';
-import useBookStore from '@/store/useBookStore';
-import {getImageFromURL} from '@/util/helper';
+import {useAppDispatch, useAppSelector} from '@/store';
+import {
+  addToCarousel,
+  bookDetailSelector,
+  isInCarouselSelector,
+  removeFromCarousel,
+} from '@/store/reducers/book';
+import {getImageFromURL, getMomentFormatFromType} from '@/util/helper';
 
 const BookDetail = () => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const {bookId} = useParams<{bookId: string}>();
-  const {bookData, isInCarousel, addToCarousel, removeFromCarousel} =
-    useBookStore();
-  const book = React.useMemo(
-    () => bookData.find(val => val.id === parseInt(bookId ?? '0', 10)),
-    [bookData]
+  const bookDetail = useAppSelector(state =>
+    bookDetailSelector(state, parseInt(bookId ?? '0', 10))
   );
-
-  React.useEffect(() => {
-    if (!book) {
-      navigate('/404', {replace: true});
-    }
-  }, []);
+  const isInCarousel = useAppSelector(state =>
+    isInCarouselSelector(state, parseInt(bookId ?? '0', 10))
+  );
 
   const [showModalEditBook, setShowModalEditBook] = React.useState(false);
   const [showModalDeleteBook, setShowModalDeleteBook] = React.useState(false);
 
-  const addRemoveFromCarousel = React.useCallback(() => {
-    if (isInCarousel(book?.id ?? 0)) {
-      removeFromCarousel(book?.id ?? 0);
+  if (!bookDetail) {
+    return <Navigate to="/404" replace />;
+  }
+
+  const addRemoveFromCarousel = () => {
+    if (isInCarousel) {
+      dispatch(removeFromCarousel(bookDetail.id ?? 0));
       return;
     }
-    addToCarousel(book?.id ?? 0);
-  }, []);
+    dispatch(addToCarousel(bookDetail.id ?? 0));
+  };
 
   return (
     <>
       <Helmet>
-        <title>{book?.title ?? ''} - Library App</title>
+        <title>{bookDetail.title} - Library App</title>
       </Helmet>
       <div className="flex h-screen flex-col">
         <header
           className="flex w-screen flex-[2] flex-col justify-between bg-cover bg-center"
-          style={{backgroundImage: `url(${getImageFromURL(book?.imgUrl)})`}}>
+          style={{
+            backgroundImage: `url(${getImageFromURL(bookDetail.imgUrl)})`,
+          }}>
           <div className="flex items-center justify-between">
             <button
               type="button"
@@ -78,35 +88,41 @@ const BookDetail = () => {
                 onClick={addRemoveFromCarousel}>
                 <FontAwesomeIcon
                   icon={
-                    (isInCarousel(book?.id ?? 0)
+                    (isInCarousel
                       ? 'fa-solid fa-star'
                       : 'fa-regular fa-star') as IconProp
                   }
                 />
                 <span className="text-[0] transition-all duration-700 group-hover:ml-2 group-hover:text-base">
-                  {isInCarousel(book?.id ?? 0) ? 'Remove' : 'Add'} to Gallery
+                  {isInCarousel ? 'Remove' : 'Add'} to Gallery
                 </span>
               </button>
             </div>
           </div>
           <div
             className="mx-2 aspect-[calc(2/3)] w-40 translate-y-[16%] self-end overflow-hidden rounded-md bg-cover bg-center shadow-lg md:mx-10 md:translate-y-[50%]"
-            style={{backgroundImage: `url(${getImageFromURL(book?.imgUrl)})`}}
+            style={{
+              backgroundImage: `url(${getImageFromURL(bookDetail.imgUrl)})`,
+            }}
           />
         </header>
         <main className="flex flex-[3] flex-col dark:bg-dark-surface md:flex-row">
-          <div className="flex-1 py-3 px-3 dark:text-white md:flex-[4] md:px-12">
+          <div className="flex-1 py-3 px-3 dark:text-white md:flex-[4] md:px-6 lg:px-12">
+            <BookCategory categories={bookDetail.category} />
             <div className="flex flex-col items-start md:flex-row md:items-center">
               <div className="flex flex-1 flex-col items-start gap-1">
-                <h3 className="rounded-full bg-yellow-400 px-4 py-1 text-sm font-semibold text-white">
-                  Novel
-                </h3>
-                <h1 className="text-3xl font-bold">{book?.title}</h1>
-                <h2 className="font-bold">30 Juni 2019</h2>
+                <h1 className="text-3xl font-bold">{bookDetail.title}</h1>
+                <h2 className="font-bold">
+                  {moment(bookDetail.datePublished.date).format(
+                    getMomentFormatFromType(bookDetail.datePublished.type.code)
+                  )}
+                </h2>
               </div>
               <h2 className="font-bold text-green-500">Available</h2>
             </div>
-            <p className="py-4 text-sm">{book?.description}</p>
+            <p className="py-4 text-sm">
+              <HTMLBreakText>{bookDetail.description}</HTMLBreakText>
+            </p>
           </div>
           <div className="flex flex-col items-center justify-end px-2 py-3 md:flex-1 md:self-end md:px-14 md:py-12">
             <button
@@ -119,14 +135,14 @@ const BookDetail = () => {
       </div>
       <ModalAddEditBook
         mode="edit"
-        bookDetail={book}
+        bookDetail={bookDetail}
         isVisible={showModalEditBook}
         onClose={() => setShowModalEditBook(false)}
       />
       <ModalConfirmDelete
         isVisible={showModalDeleteBook}
-        bookId={book?.id ?? 0}
-        bookTitle={book?.title ?? ''}
+        bookId={bookDetail.id}
+        bookTitle={bookDetail.title}
         onAfterDelete={() => {
           navigate(-1);
           toast.success('Success deleting book', {

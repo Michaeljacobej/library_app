@@ -1,4 +1,5 @@
 import React from 'react';
+import {Helmet} from 'react-helmet';
 import {useNavigate} from 'react-router-dom';
 
 import HomeBookList from '@/components/HomeBookList';
@@ -20,6 +21,9 @@ const Home = () => {
 
   return (
     <>
+      <Helmet>
+        <title>Library Home</title>
+      </Helmet>
       <div className="flex min-h-screen justify-end dark:bg-dark-surface">
         <HomeSideNav
           overlay={showSideNavOverlay}
@@ -33,12 +37,7 @@ const Home = () => {
           <NavHeader onBurgerClick={() => setShowSideNavOverlay(true)} />
           <div className="flex flex-col">
             <HomeCarousel onBookClick={onBookClick} />
-            <section className="w-full flex-grow px-4 py-4 transition-all">
-              <h3 className="pb-4 text-2xl font-bold dark:text-lighter-gray">
-                List Book
-              </h3>
-              <HomeBookList onBookClick={onBookClick} />
-            </section>
+            <HomeBookList onBookClick={onBookClick} />
           </div>
         </main>
       </div>

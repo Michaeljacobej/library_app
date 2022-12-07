@@ -3,12 +3,15 @@ import React from 'react';
 import {Helmet} from 'react-helmet';
 import {SubmitHandler, useForm} from 'react-hook-form';
 import toast from 'react-hot-toast';
+import {useDispatch} from 'react-redux';
 import {Link, useNavigate} from 'react-router-dom';
 
 import AuthLogo from '@/components/AuthLogo';
 import AuthSectionLeft from '@/components/AuthSectionLeft';
 import ButtonThemeToggler from '@/components/ButtonThemeToggler';
 import LoadingButtonPlaceholder from '@/components/LoadingButtonPlaceholder';
+import useAuthCheck from '@/hooks/useAuthCheck';
+import {doRegister} from '@/store/reducers/auth';
 
 type RegisterInputs = {
   username: string;
@@ -18,12 +21,15 @@ type RegisterInputs = {
 };
 
 const Register: React.FC = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const {checkRegisteredUser} = useAuthCheck();
   const [showPassword, setShowPassword] = React.useState(false);
   const {
     register,
     handleSubmit,
     watch,
+    setError,
     formState: {errors, isSubmitting},
   } = useForm<RegisterInputs>();
 
@@ -31,17 +37,34 @@ const Register: React.FC = () => {
     setShowPassword(state => !state);
   }, []);
 
-  const onSubmit: SubmitHandler<RegisterInputs> =
-    React.useCallback(async () => {
+  const onSubmit: SubmitHandler<RegisterInputs> = React.useCallback(
+    async data => {
       await new Promise<void>(resolve => {
         setTimeout(async () => resolve(), 2000);
       });
-      navigate('/login');
-      toast.success('Register success', {
-        position: 'top-right',
-        className: 'bg-green-200 dark:bg-green-700 text-black dark:text-white',
-      });
-    }, []);
+      const foundUser = checkRegisteredUser(data.email, data.username);
+      if (foundUser.success) {
+        dispatch(doRegister(data));
+        navigate('/login');
+        toast.success('Register success', {
+          position: 'top-right',
+          className:
+            'bg-green-200 dark:bg-green-700 text-black dark:text-white',
+        });
+        return;
+      }
+      if (foundUser.error?.email) {
+        setError('email', {message: foundUser.error?.email, type: 'value'});
+      }
+      if (foundUser.error?.username) {
+        setError('username', {
+          message: foundUser.error?.username,
+          type: 'value',
+        });
+      }
+    },
+    []
+  );
 
   return (
     <>
@@ -73,11 +96,15 @@ const Register: React.FC = () => {
                 <input
                   type="text"
                   aria-invalid={errors.username && 'true'}
-                  className={`peer w-full rounded-md border border-lighter-gray bg-white px-3 py-2 text-black drop-shadow-xl transition-all focus:pt-7 focus:outline-2 focus:outline-black disabled:bg-gray-100 aria-[invalid]:border-red-500 dark:bg-dark-surface dark:text-white dark:focus:outline-white dark:disabled:bg-white/10 ${
+                  className={`peer w-full rounded-md border border-lighter-gray bg-white px-3 py-2 text-black drop-shadow-xl transition-all focus:pt-7 focus:outline-2 focus:outline-black disabled:bg-gray-100 aria-[invalid]:border-red-500 aria-[invalid]:text-red-500 dark:bg-dark-surface dark:text-white dark:focus:outline-white dark:disabled:bg-white/10 dark:aria-[invalid]:text-red-500 ${
                     watch('username') ? 'pt-7' : ''
                   }`}
                   {...register('username', {
                     required: 'Username is required',
+                    pattern: {
+                      value: /^[A-Za-z][A-Za-z0-9_]{4,20}$/,
+                      message: 'Username is not valid',
+                    },
                   })}
                 />
                 <label
@@ -97,11 +124,19 @@ const Register: React.FC = () => {
                 <input
                   type="text"
                   aria-invalid={errors.fullname && 'true'}
-                  className={`peer w-full rounded-md border border-lighter-gray bg-white px-3 py-2 text-black drop-shadow-xl transition-all focus:pt-7 focus:outline-2 focus:outline-black disabled:bg-gray-100 aria-[invalid]:border-red-500 dark:bg-dark-surface dark:text-white dark:focus:outline-white dark:disabled:bg-white/10 ${
+                  className={`peer w-full rounded-md border border-lighter-gray bg-white px-3 py-2 text-black drop-shadow-xl transition-all focus:pt-7 focus:outline-2 focus:outline-black disabled:bg-gray-100 aria-[invalid]:border-red-500 aria-[invalid]:text-red-500 dark:bg-dark-surface dark:text-white dark:focus:outline-white dark:disabled:bg-white/10 dark:aria-[invalid]:text-red-500 ${
                     watch('fullname') ? 'pt-7' : ''
                   }`}
                   {...register('fullname', {
                     required: 'Fullname is required',
+                    minLength: {
+                      message: 'Fullname must be between 4 and 32',
+                      value: 4,
+                    },
+                    maxLength: {
+                      message: 'Fullname must be between 4 and 32',
+                      value: 32,
+                    },
                   })}
                 />
                 <label
@@ -121,7 +156,7 @@ const Register: React.FC = () => {
                 <input
                   type="email"
                   aria-invalid={errors.email && 'true'}
-                  className={`peer w-full rounded-md border border-lighter-gray bg-white px-3 py-2 text-black drop-shadow-xl transition-all focus:pt-7 focus:outline-2 focus:outline-black disabled:bg-gray-100 aria-[invalid]:border-red-500 dark:bg-dark-surface dark:text-white dark:focus:outline-white dark:disabled:bg-white/10 ${
+                  className={`peer w-full rounded-md border border-lighter-gray bg-white px-3 py-2 text-black drop-shadow-xl transition-all focus:pt-7 focus:outline-2 focus:outline-black disabled:bg-gray-100 aria-[invalid]:border-red-500 aria-[invalid]:text-red-500 dark:bg-dark-surface dark:text-white dark:focus:outline-white dark:disabled:bg-white/10 dark:aria-[invalid]:text-red-500 ${
                     watch('email') ? 'pt-7' : ''
                   }`}
                   {...register('email', {
@@ -149,7 +184,7 @@ const Register: React.FC = () => {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   aria-invalid={errors.password && 'true'}
-                  className={`peer w-full rounded-md border border-lighter-gray bg-white px-3 py-2 text-black drop-shadow-xl transition-all focus:pt-7 focus:outline-2 focus:outline-black disabled:bg-gray-100 aria-[invalid]:border-red-500 dark:bg-dark-surface dark:text-white dark:focus:outline-white dark:disabled:bg-white/10 ${
+                  className={`peer w-full rounded-md border border-lighter-gray bg-white px-3 py-2 text-black drop-shadow-xl transition-all focus:pt-7 focus:outline-2 focus:outline-black disabled:bg-gray-100 aria-[invalid]:border-red-500 aria-[invalid]:text-red-500 dark:bg-dark-surface dark:text-white dark:focus:outline-white dark:disabled:bg-white/10 dark:aria-[invalid]:text-red-500 ${
                     watch('password') ? 'pt-7' : ''
                   }`}
                   {...register('password', {

@@ -1,21 +1,21 @@
 import React from 'react';
 import {useNavigate} from 'react-router-dom';
 
-import useLoginStore from '@/store/useLoginStore';
+import {useAppSelector} from '@/store';
 
 const useIsLogin = (protect: boolean = false): boolean => {
-  const isLoggedIn = useLoginStore(state => state.loggedIn);
+  const isAuth = useAppSelector(state => state.auth.isAuth);
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    if (isLoggedIn && protect) {
+    if (isAuth && protect) {
       navigate('/home', {replace: true});
     } else {
       navigate('/login', {replace: true});
     }
   }, []);
 
-  return isLoggedIn;
+  return isAuth;
 };
 
 export default useIsLogin;
