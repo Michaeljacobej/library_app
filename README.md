@@ -1,4 +1,4 @@
-# Library App with React
+# Library App
 
 Library applications, often referred to as library management systems or library automation software, are designed to streamline and automate various library functions. Here's what library applications are used for:
 
